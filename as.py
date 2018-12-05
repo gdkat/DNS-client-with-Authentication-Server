@@ -32,9 +32,23 @@ def rs():
     AS_table = {}
     host=mysoc.gethostname()
     com = tlds1
+    #host = "cpp.cs.rutgers.edu"
     AS_table[com] = {'ip': mysoc.gethostbyname(host), 'flag':'NS'}
     edu = tlds2
+    #host = "java.cs.rutgers.edu"
     AS_table[edu] = {'ip': mysoc.gethostbyname(host), 'flag':'NS'}
+
+    #doing server binding stuff here
+    #listen for and accept client connection
+    server_binding = ('',50008)
+    assd.bind(server_binding)
+    assd.listen(1)
+    host=mysoc.gethostname()
+    print("[S]: Authentication Server host name is: ",host)
+    localhost_ip=(mysoc.gethostbyname(host))
+    print("[S]: Attempting to connect to client.\n[S]: Server IP address is  ",localhost_ip)
+    casd,addr=assd.accept()
+    print ("[S]: Got a connection request from a client at", addr)
 
     try:
         sa_sameas_myaddr = AS_table[com]['ip']
@@ -54,18 +68,6 @@ def rs():
         print('{} \n'.format("TLDS2 connect error "), err)
         exit()
 
-    #doing server binding stuff here
-    #listen for and accept client connection
-    server_binding = ('',50008)
-    assd.bind(server_binding)
-    assd.listen(1)
-    host=mysoc.gethostname()
-    print("[S]: Authentication Server host name is: ",host)
-    localhost_ip=(mysoc.gethostbyname(host))
-    print("[S]: Attempting to connect to client.\n[S]: Server IP address is  ",localhost_ip)
-    casd,addr=assd.accept()
-    print ("[S]: Got a connection request from a client at", addr)
-
     server=""
     #Authentication Loop
     while True:
@@ -83,12 +85,12 @@ def rs():
         digestTLDS2=pickle.loads(astotsedu.recv(100))
         if dvalid.hexdigest()==digestTLDS1:
             server="TLDS1"
-            astotscom.send(pickle.dumps("pass"))
+            astotscom.send(pickle.dumps(host))
             astotsedu.send(pickle.dumps("fail"))
         elif dvalid.hexdigest()==digestTLDS2:
             server="TLDS2"
             astotscom.send(pickle.dumps("fail"))
-            astotsedu.send(pickle.dumps("pass"))
+            astotsedu.send(pickle.dumps(host))
         else:
             server="error"
             astotscom.send(pickle.dumps("fail"))

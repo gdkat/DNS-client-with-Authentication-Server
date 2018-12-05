@@ -73,16 +73,7 @@ def ts():
     assd,addr=astssd.accept()
     print ("[S]: Got a connection request from a client at", addr)
 
-    server_binding=('',5679)
-    ctssd.bind(server_binding)
-    ctssd.listen(1)
-    host=mysoc.gethostname()
-    print("[S]: Server host name is: ",host)
-    localhost_ip=(mysoc.gethostbyname(host))
-    print("[S]: Attempting to connect to as.\n[S]: Server IP address is  ",localhost_ip)
-    ctsd,addr=ctssd.accept()
-    print ("[S]: Got a connection request from a client at", addr)
-
+    firstClient = True
     while True:
         data = (assd.recv(100))
         if not data: break
@@ -92,6 +83,18 @@ def ts():
         auth=pickle.loads(assd.recv(100))
         if "fail" in auth:
             continue
+        
+        if firstClient:
+            firstClient = False
+            server_binding=('',5679)
+            ctssd.bind(server_binding)
+            ctssd.listen(1)
+            host=auth
+            print("[S]: Server host name is: ",host)
+            localhost_ip=(mysoc.gethostbyname(host))
+            print("[S]: Attempting to connect to as.\n[S]: Server IP address is  ",localhost_ip)
+            ctsd,addr=ctssd.accept()
+            print ("[S]: Got a connection request from a client at", addr)
 
         hnstring=pickle.loads(ctsd.recv(100))
         if not hnstring: continue
